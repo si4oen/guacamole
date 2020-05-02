@@ -1,21 +1,22 @@
-. .env
+#!/bin/bash
 
+#. .env
 # Used from .env
 # PASSWD: The postgres password
 
 # Set up Guacd
 echo Creating guacd container...
-docker run -d \
+docker run -d --restart=always \
     --name guacd \
     guacamole/guacd
 
 # Set up Postgres image
 echo Creating postgres container...
-docker run -d \
+docker run -d --restart=always \
     --name guac-postgres \
     -e POSTGRES_USER=postgres \
-    -e POSTGRES_PASSWORD=$PASSWD \
-    -v /docker/data/guacamole/database:/var/lib/postgresql/data   \
+    -e POSTGRES_PASSWORD=postgres \
+    -v /docker/data/guacamole/database:/var/lib/postgresql/data \
     postgres
     
 echo "Do you want to initialize the database? If you already have a working guacamole schema, choose no! (yes/no)"
@@ -44,14 +45,14 @@ fi
 
 # set up guacamole
 echo Creating guacamole container
-docker run -d \
+docker run -d --restart=always \
     --name guacamole \
     --link guacd:guacd \
     --link guac-postgres:postgres \
     -e POSTGRES_USER=postgres \
-    -e POSTGRES_PASSWORD=$PASSWD \
+    -e POSTGRES_PASSWORD=postgres \
     -e POSTGRES_DATABASE=guacamole_db \
-    -v /docker/data/guacamole/guacamole:/guac   \
+    -v /docker/data/guacamole/guacamole:/guac \
     -e GUACAMOLE_HOME=/guac \
-    -p 4080:8080 \
+    -p 8080:8080 \
     guacamole/guacamole
